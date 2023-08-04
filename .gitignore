@@ -1,3 +1,5 @@
 *.sublime-workspace
 build
 *.bag
+*.vscode
+.vscode
