@@ -29,6 +29,11 @@
 
 #include "direct_bag.h"
 
+#include <chrono>
+#include <ctime>
+
+std::string getCurrentTime();
+
 namespace rosbag_direct_write
 {
 
@@ -78,6 +83,17 @@ write_ptr_to_buffer(VectorBuffer &buffer, const T *data, size_t data_length)
                 reinterpret_cast<const uint8_t *>(data),
                 reinterpret_cast<const uint8_t *>(data) + data_length);
 }
+
+// Get current time, format as yymmdd-hh-mm-ss
+std::string getCurrentTime() {
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);
+    std::tm* local_time = std::localtime(&now_time_t);
+    std::ostringstream oss;
+    oss << std::put_time(local_time, "%y%m%d-%H-%M-%S");
+
+    return oss.str(); 
+} 
 
 inline void
 write_version(VectorBuffer &buffer)
@@ -669,8 +685,12 @@ generate_bag_name(std::string folder_path, std::string file_prefix,
   {
     ss << "-";
   }
-  ss << std::setfill('0') << std::setw(bag_number_width) << bag_number
+  if (bag_number_width != 0) {
+    ss << std::setfill('0') << std::setw(bag_number_width) << bag_number
      << ".bag";
+  } else {
+    ss << getCurrentTime() << ".bag";
+  }
   return ss.str();
 }
 

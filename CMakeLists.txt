@@ -11,12 +11,16 @@ catkin_package(
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
+link_directories(${PROJECT_SOURCE_DIR}/lib)
+
 add_library(${PROJECT_NAME}
-  src/direct_bag.cpp)
+  src/direct_bag.cpp
+  src/demo_common.c
+)
 
 add_executable(bag_write src/main.cpp)
 
-target_link_libraries(bag_write ${catkin_LIBRARIES} ${PROJECT_NAME} realsense2)
+target_link_libraries(bag_write ${catkin_LIBRARIES} ${PROJECT_NAME} realsense2 eSDKOBS securec)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 

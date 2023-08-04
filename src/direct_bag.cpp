@@ -24,7 +24,15 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <queue>
+#include <mutex>
+#include <condition_variable>
+
 #include <rosbag_direct_write/direct_bag_impl_dependencies.h>
+
+extern std::queue<std::string> waitingList;
+extern std::mutex mtx;
+extern std::condition_variable cv;
 
 namespace rosbag_direct_write {
 
@@ -458,7 +466,12 @@ void DirectBagCollection::check_bag_threshold_() {
 void DirectBagCollection::close_current_bag_() {
   assert(current_bag_ != nullptr);
   assert(current_bag_->is_open());
+  std::string cur_bag_name = current_bag_->get_bag_file_name();
+  std::unique_lock<std::mutex> lock(mtx);
   current_bag_->close();
+  waitingList.push(cur_bag_name);
+  cv.notify_one();
+  std::cout << "Finish bag recording: " << cur_bag_name << std::endl;
   current_bag_.reset();
 }
 
