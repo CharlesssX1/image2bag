@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rosbag_direct_write)
 
+SET(CMAKE_BUILD_TYPE "Debug")
+SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g2 -ggdb")
+SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+
 find_package(catkin REQUIRED COMPONENTS cpp_common rosbag_storage roscpp_serialization)
 
 catkin_package(
@@ -11,16 +15,17 @@ catkin_package(
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-link_directories(${PROJECT_SOURCE_DIR}/lib)
+link_directories(${PROJECT_SOURCE_DIR}/lib /home/pi/ros_catkin_ws/devel/lib)
 
 add_library(${PROJECT_NAME}
   src/direct_bag.cpp
   src/demo_common.c
+  src/utils.cpp
 )
 
 add_executable(bag_write src/main.cpp)
-
-target_link_libraries(bag_write ${catkin_LIBRARIES} ${PROJECT_NAME} realsense2 eSDKOBS securec)
+add_dependencies(bag_write ${PROJECT_NAME})
+target_link_libraries(bag_write ${catkin_LIBRARIES} ${PROJECT_NAME} realsense2 eSDKOBS securec yaml-cpp)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
